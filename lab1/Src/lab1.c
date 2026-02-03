@@ -32,12 +32,12 @@ int main(void)
   assert(((GPIOC->MODER >> (2*7)) & 0x3) == 0x1);
   assert(((GPIOC->MODER >> (2*8)) & 0x3) == 0x1);
   assert(((GPIOC->MODER >> (2*9)) & 0x3) == 0x1);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET); // Start PC8 high
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET); // Start PC8 high
 
   while (1) {
       HAL_Delay(200); // Delay 200ms
       // Toggle the output state of both PC8 and PC9
-      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
+      My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
   }
 }
 
