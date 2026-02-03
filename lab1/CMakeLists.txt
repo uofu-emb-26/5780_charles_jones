@@ -4,6 +4,7 @@ add_executable(lab1
     Src/hal_gpio.c
     Src/stm32f0xx_hal_msp.c
     Src/stm32f0xx_it.c
+    Src/system_setup.c
 )
 
 # Add the map file to the list of files to be removed with 'clean' target
