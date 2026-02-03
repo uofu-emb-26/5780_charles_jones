@@ -23,21 +23,27 @@ int main(void)
   assert((RCC->AHBENR & RCC_AHBENR_GPIOCEN) != 0);
 
   // Set up config struc to pass to the initializer
-  GPIO_InitTypeDef initStr = {GPIO_PIN_8 | GPIO_PIN_9,
+  GPIO_InitTypeDef initStr = {GPIO_PIN_6 | GPIO_PIN_7,
                               GPIO_MODE_OUTPUT_PP,
                               GPIO_SPEED_FREQ_LOW,
                               GPIO_NOPULL};
-  My_HAL_GPIO_Init(GPIOC, &initStr); // Initialize pins PC8 & PC9
-  assert(((GPIOC->MODER >> (2*6)) & 0x3) == 0x1);
-  assert(((GPIOC->MODER >> (2*7)) & 0x3) == 0x1);
-  assert(((GPIOC->MODER >> (2*8)) & 0x3) == 0x1);
-  assert(((GPIOC->MODER >> (2*9)) & 0x3) == 0x1);
-  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET); // Start PC8 high
+  My_HAL_GPIO_Init(GPIOC, &initStr); // Initialize pins PC6 & PC7
+  assert(((GPIOC->OTYPER >> 6) & 0x1) == 0);
+  assert(((GPIOC->OTYPER >> 7) & 0x1) == 0);
+
+  assert(((GPIOC->OSPEEDR >> (2*6)) & 0x3) == 0);
+  assert(((GPIOC->OSPEEDR >> (2*7)) & 0x3) == 0);
+
+  assert(((GPIOC->PUPDR >> (2*6)) & 0x3) == 0);
+  assert(((GPIOC->PUPDR >> (2*7)) & 0x3) == 0);
+
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
+  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
 
   while (1) {
       HAL_Delay(200); // Delay 200ms
-      // Toggle the output state of both PC8 and PC9
-      My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_9);
+      // Toggle the output state of both PC6 and PC7
+      My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
   }
 }
 

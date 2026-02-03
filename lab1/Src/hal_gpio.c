@@ -8,17 +8,17 @@ void My_HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
 
     if (GPIOx == GPIOC){
         // set MODER
-        GPIOC->MODER &= ~(3u << (2*8) | 3u << (2*9));
-        GPIOC->MODER |= ((1u << (2*8)) | (1u << (2*9)));
+        GPIOC->MODER &= ~(3u << (2*6) | 3u << (2*7));
+        GPIOC->MODER |= ((1u << (2*6)) | (1u << (2*7)));
 
         // set OTYPER
-        GPIOC->OTYPER &= ~(1u << (8) | 1u << (9));
+        GPIOC->OTYPER &= ~(1u << (6) | 1u << (7));
 
         // set OSPEEDR
-        GPIOC->OSPEEDR &= ~(3u << (2*8) | 3u << (2*9));
+        GPIOC->OSPEEDR &= ~(3u << (2*6) | 3u << (2*7));
 
         // set PUDR
-        GPIOC->PUPDR &= ~(3u << (2*8) | 3u << (2*9));
+        GPIOC->PUPDR &= ~(3u << (2*6) | 3u << (2*7));
     }
 }
 
