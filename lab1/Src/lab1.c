@@ -20,7 +20,11 @@ int main(void)
      with hardware register access. */
 
   My_HAL_RCC_GPIOC_CLK_Enable(); // Enable the GPIOC clock
+  My_HAL_RCC_GPIOA_CLK_Enable(); // Enable the GPIOC clock
   assert((RCC->AHBENR & RCC_AHBENR_GPIOCEN) != 0);
+
+  GPIO_InitTypeDef btnStr = { GPIO_PIN_0, 0, 0, 0 };
+  My_HAL_GPIO_Init(GPIOA, &btnStr);
 
   // Set up config struc to pass to the initializer
   GPIO_InitTypeDef initStr = {GPIO_PIN_6 | GPIO_PIN_7,
@@ -40,10 +44,22 @@ int main(void)
   My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
   My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
 
+  uint32_t debouncer = 0;
+
   while (1) {
-      HAL_Delay(200); // Delay 200ms
-      // Toggle the output state of both PC6 and PC7
-      My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+      debouncer <<= 1;
+
+      uint32_t input_signal =
+          (My_HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET);
+
+      if (input_signal) {
+          debouncer |= 1u;
+      }
+
+      // one-shot when it becomes steadily high (press)
+      if (debouncer == 0x7FFFFFFF) {
+          My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7);
+      }
   }
 }
 

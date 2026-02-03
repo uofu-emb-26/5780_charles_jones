@@ -20,6 +20,19 @@ void My_HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
         // set PUDR
         GPIOC->PUPDR &= ~(3u << (2*6) | 3u << (2*7));
     }
+
+    if (GPIOx == GPIOA) {
+
+    // PA0 input mode (MODER = 00)
+    GPIOA->MODER &= ~(3u << (2*0));
+
+    // Low speed (OSPEEDR = 00)
+    GPIOA->OSPEEDR &= ~(3u << (2*0));
+
+    // Pull-down resistor (PUPDR = 10)
+    GPIOA->PUPDR &= ~(3u << (2*0));
+    GPIOA->PUPDR |=  (2u << (2*0));
+    }
 }
 
 /*
@@ -28,12 +41,16 @@ void My_HAL_GPIO_DeInit(GPIO_TypeDef  *GPIOx, uint32_t GPIO_Pin)
 }
 */
 
-/*
+
 GPIO_PinState My_HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 {
-    return -1;
+    if (GPIOx->IDR & GPIO_Pin) {
+        return GPIO_PIN_SET;
+    } else {
+        return GPIO_PIN_RESET;
+    }
 }
-*/
+
 
 void My_HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
 {
@@ -54,4 +71,9 @@ void My_HAL_GPIO_TogglePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 void My_HAL_RCC_GPIOC_CLK_Enable(void)
 {
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+}
+
+void My_HAL_RCC_GPIOA_CLK_Enable(void)
+{
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 }
