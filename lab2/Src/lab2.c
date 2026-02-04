@@ -22,9 +22,8 @@ int main(void)
                               GPIO_MODE_OUTPUT_PP,
                               GPIO_SPEED_FREQ_LOW,
                               GPIO_NOPULL};
-  My_HAL_GPIO_Init(GPIOC, &initStr); // Initialize pins PC6 & PC7
+  My_HAL_GPIO_Init(GPIOC, &initStr); // Initialize pins
 
-  // Button init (PA0 input, pulldown)
   GPIO_InitTypeDef btnStr = { GPIO_PIN_0,
                               GPIO_MODE_INPUT,
                               GPIO_SPEED_FREQ_LOW,
@@ -34,16 +33,17 @@ int main(void)
   assert((EXTI->IMR  & (1u << 0)) == 0);
   assert((EXTI->RTSR & (1u << 0)) == 0);
   Configure_EXTI0_Rising();
-  // AFTER: expect unmasked + rising enabled, falling disabled
   assert((EXTI->IMR  & (1u << 0)) != 0);
   assert((EXTI->RTSR & (1u << 0)) != 0);
   assert((EXTI->FTSR & (1u << 0)) == 0);
   assert((SYSCFG->EXTICR[0] & 0xFu) == 0x0u);
 
+  NVIC_SetPriority(SysTick_IRQn, 0);     // highest priority
+
   while (1)
   {
     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
-    HAL_Delay(2000);
+    HAL_Delay(500);
   }
 }
 

@@ -80,9 +80,8 @@ void My_HAL_RCC_GPIOA_CLK_Enable(void)
 
 void Configure_EXTI0_Rising(void)
 {
-    // Map PA0 -> EXTI0 (often default, but do it explicitly)
     __HAL_RCC_SYSCFG_CLK_ENABLE();
-    SYSCFG->EXTICR[0] &= ~(0xFu << 0);   // EXTI0 = PA0
+    SYSCFG->EXTICR[0] &= ~(0xFu << 0);
 
     EXTI->IMR  |=  (1u << 0);
     EXTI->RTSR |=  (1u << 0);
@@ -90,6 +89,6 @@ void Configure_EXTI0_Rising(void)
     EXTI->PR = (1u << 0);
 
     // set priority and enable
-    NVIC_SetPriority(EXTI0_1_IRQn, 1);
+    NVIC_SetPriority(EXTI0_1_IRQn, 3);
     NVIC_EnableIRQ(EXTI0_1_IRQn);
 }

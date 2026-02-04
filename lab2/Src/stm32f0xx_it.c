@@ -50,7 +50,7 @@ void SysTick_Handler(void)
 
   tickCount++;
 
-  if (tickCount >= 1000)
+  if (tickCount >= 200)
   {
     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);  // blue LED
     tickCount = 0;
@@ -59,9 +59,15 @@ void SysTick_Handler(void)
 
 void EXTI0_1_IRQHandler(void)
 {
-  // Check pending flag for EXTI0
+  static volatile uint32_t i = 0;
+  // Check pending flag
   if (EXTI->PR & (1u << 0)) {
     EXTI->PR = (1u << 0);
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
+
+    for (i = 0; i < 1500000; i++) { __NOP(); }
+
     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
   }
