@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include <assert.h>
 
 void SystemClock_Config(void);
 
@@ -15,6 +16,7 @@ int main(void)
   SystemClock_Config();
 
   My_HAL_RCC_GPIOC_CLK_Enable(); // Enable the GPIOC clock
+  My_HAL_RCC_GPIOA_CLK_Enable(); // Enable the GPIOC clock
 
   GPIO_InitTypeDef initStr = {GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_9,
                               GPIO_MODE_OUTPUT_PP,
@@ -22,13 +24,28 @@ int main(void)
                               GPIO_NOPULL};
   My_HAL_GPIO_Init(GPIOC, &initStr); // Initialize pins PC6 & PC7
 
+  // Button init (PA0 input, pulldown)
+  GPIO_InitTypeDef btnStr = { GPIO_PIN_0,
+                              GPIO_MODE_INPUT,
+                              GPIO_SPEED_FREQ_LOW,
+                              GPIO_PULLDOWN };
+  My_HAL_GPIO_Init(GPIOA, &btnStr);
+
   // Set green LED (PC9) high
   My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
+
+  assert((EXTI->IMR  & (1u << 0)) == 0);
+  assert((EXTI->RTSR & (1u << 0)) == 0);
+  Configure_EXTI0_Rising();
+  // AFTER: expect unmasked + rising enabled, falling disabled
+  assert((EXTI->IMR  & (1u << 0)) != 0);
+  assert((EXTI->RTSR & (1u << 0)) != 0);
+  assert((EXTI->FTSR & (1u << 0)) == 0);
 
   while (1)
   {
     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
-    HAL_Delay(500);
+    HAL_Delay(2000);
   }
 }
 

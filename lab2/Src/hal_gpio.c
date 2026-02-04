@@ -77,3 +77,19 @@ void My_HAL_RCC_GPIOA_CLK_Enable(void)
 {
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 }
+
+void Configure_EXTI0_Rising(void)
+{
+    // Map PA0 -> EXTI0 (often default, but do it explicitly)
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    SYSCFG->EXTICR[0] &= ~(0xFu << 0);   // EXTI0 = PA0
+
+    EXTI->IMR  |=  (1u << 0);
+    EXTI->RTSR |=  (1u << 0);
+    EXTI->FTSR &= ~(1u << 0);
+    EXTI->PR = (1u << 0);
+
+    // Enable in NVIC so it can actually fire
+    NVIC_SetPriority(EXTI0_1_IRQn, 2);
+    NVIC_EnableIRQ(EXTI0_1_IRQn);
+}

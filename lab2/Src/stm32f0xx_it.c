@@ -44,14 +44,25 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  static uint32_t tickCount = 0;
+  static volatile uint32_t tickCount = 0;
 
   HAL_IncTick();
 
-  if (++tickCount >= 200)
+  tickCount++;
+
+  if (tickCount >= 1000)
   {
     My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);  // blue LED
     tickCount = 0;
+  }
+}
+
+void EXTI0_1_IRQHandler(void)
+{
+  // Check pending flag for EXTI0
+  if (EXTI->PR & (1u << 0)) {
+    EXTI->PR = (1u << 0);              // clear pending flag by writing 1
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);  // do something visible (pick an LED pin you use)
   }
 }
 
