@@ -18,7 +18,7 @@ int main(void)
   My_HAL_RCC_GPIOC_CLK_Enable(); // Enable the GPIOC clock
   My_HAL_RCC_GPIOA_CLK_Enable(); // Enable the GPIOC clock
 
-  GPIO_InitTypeDef initStr = {GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_9,
+  GPIO_InitTypeDef initStr = {GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
                               GPIO_MODE_OUTPUT_PP,
                               GPIO_SPEED_FREQ_LOW,
                               GPIO_NOPULL};
@@ -31,9 +31,6 @@ int main(void)
                               GPIO_PULLDOWN };
   My_HAL_GPIO_Init(GPIOA, &btnStr);
 
-  // Set green LED (PC9) high
-  My_HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
-
   assert((EXTI->IMR  & (1u << 0)) == 0);
   assert((EXTI->RTSR & (1u << 0)) == 0);
   Configure_EXTI0_Rising();
@@ -41,6 +38,7 @@ int main(void)
   assert((EXTI->IMR  & (1u << 0)) != 0);
   assert((EXTI->RTSR & (1u << 0)) != 0);
   assert((EXTI->FTSR & (1u << 0)) == 0);
+  assert((SYSCFG->EXTICR[0] & 0xFu) == 0x0u);
 
   while (1)
   {

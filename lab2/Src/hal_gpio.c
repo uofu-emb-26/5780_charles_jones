@@ -8,17 +8,17 @@ void My_HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
 
     if (GPIOx == GPIOC){
         // set MODER
-        GPIOC->MODER &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*9));
-        GPIOC->MODER |= ((1u << (2*6)) | (1u << (2*7)) | (1u << (2*9)));
+        GPIOC->MODER &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*8) | 3u << (2*9));
+        GPIOC->MODER |= ((1u << (2*6)) | (1u << (2*7)) | (1u << (2*8)) | (1u << (2*9)));
 
         // set OTYPER
-        GPIOC->OTYPER &= ~(1u << (6) | 1u << (7) | 1u << (9));
+        GPIOC->OTYPER &= ~(1u << (6) | 1u << (7) | 1u << (8) | 1u << (9));
 
         // set OSPEEDR
-        GPIOC->OSPEEDR &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*9));
+        GPIOC->OSPEEDR &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*8) | 3u << (2*9));
 
         // set PUDR
-        GPIOC->PUPDR &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*9));
+        GPIOC->PUPDR &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*8) | 3u << (2*9));
     }
 
     if (GPIOx == GPIOA) {
@@ -89,7 +89,7 @@ void Configure_EXTI0_Rising(void)
     EXTI->FTSR &= ~(1u << 0);
     EXTI->PR = (1u << 0);
 
-    // Enable in NVIC so it can actually fire
-    NVIC_SetPriority(EXTI0_1_IRQn, 2);
+    // set priority and enable
+    NVIC_SetPriority(EXTI0_1_IRQn, 1);
     NVIC_EnableIRQ(EXTI0_1_IRQn);
 }

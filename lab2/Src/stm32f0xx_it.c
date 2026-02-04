@@ -61,8 +61,9 @@ void EXTI0_1_IRQHandler(void)
 {
   // Check pending flag for EXTI0
   if (EXTI->PR & (1u << 0)) {
-    EXTI->PR = (1u << 0);              // clear pending flag by writing 1
-    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);  // do something visible (pick an LED pin you use)
+    EXTI->PR = (1u << 0);
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+    My_HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
   }
 }
 
