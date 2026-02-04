@@ -38,7 +38,7 @@ int main(void)
   assert((EXTI->FTSR & (1u << 0)) == 0);
   assert((SYSCFG->EXTICR[0] & 0xFu) == 0x0u);
 
-  NVIC_SetPriority(SysTick_IRQn, 0);     // highest priority
+  NVIC_SetPriority(SysTick_IRQn, 2);     // highest priority
 
   while (1)
   {
