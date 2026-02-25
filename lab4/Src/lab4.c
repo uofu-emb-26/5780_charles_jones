@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include "hal_usart.h"
 
 void SystemClock_Config(void);
 
@@ -9,16 +10,19 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  /* Configure the system clock */
   SystemClock_Config();
+
+  usart3_init_min();
+
+  const char *msg = "whats up\r\n";
+  for (const char *p = msg; *p; p++) usart3_write_char(*p);
 
   while (1)
   {
- 
+    char c = usart3_read_char();
+        usart3_write_char(c);
   }
-  return -1;
 }
 
 /**
