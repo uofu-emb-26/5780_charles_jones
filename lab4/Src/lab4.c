@@ -1,6 +1,7 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
 #include "hal_usart.h"
+#include "hal_gpio.h"
 
 void SystemClock_Config(void);
 
@@ -15,13 +16,26 @@ int main(void)
 
   usart3_init_min();
 
-  const char *msg = "whats up\r\n";
-  for (const char *p = msg; *p; p++) usart3_write_char(*p);
+  My_HAL_GPIO_Init(GPIOC, 6);
+  My_HAL_GPIO_Init(GPIOC, 7);
 
   while (1)
   {
-    char c = usart3_read_char();
-        usart3_write_char(c);
+    while ((USART3->ISR & USART_ISR_RXNE) == 0) { }
+
+    char c = (char)(USART3->RDR & 0xFF);
+
+    if (c == 'r') {
+        GPIOC->ODR ^= (1U << 6); // toggle red
+    }
+    else if (c == 'b') {
+        GPIOC->ODR ^= (1U << 7); // toggle blue
+    }
+    else {
+        // invalid error
+        const char *e = "Invalid key\r\n";
+        for (const char *p = e; *p; p++) usart3_write_char(*p);
+    }
   }
 }
 
