@@ -5,6 +5,14 @@
 
 void SystemClock_Config(void);
 
+volatile char g_rx_char = 0;
+volatile int  g_rx_ready = 0;
+
+static void usart3_write_string(const char *s)
+{
+    while (*s) usart3_write_char(*s++);
+}
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -16,26 +24,68 @@ int main(void)
 
   usart3_init_min();
 
-  My_HAL_GPIO_Init(GPIOC, 6);
-  My_HAL_GPIO_Init(GPIOC, 7);
+  GPIO_InitTypeDef init = {0};
+  My_HAL_GPIO_Init(GPIOC, &init);
+
+  usart3_write_string("CMD? ");
+
+  char cmd_color = 0;
+  int  have_first = 0;
 
   while (1)
   {
-    while ((USART3->ISR & USART_ISR_RXNE) == 0) { }
+    if (!g_rx_ready) continue;
 
-    char c = (char)(USART3->RDR & 0xFF);
+        char c = g_rx_char;
+        g_rx_ready = 0;
 
-    if (c == 'r') {
-        GPIOC->ODR ^= (1U << 6); // toggle red
-    }
-    else if (c == 'b') {
-        GPIOC->ODR ^= (1U << 7); // toggle blue
-    }
-    else {
-        // invalid error
-        const char *e = "Invalid key\r\n";
-        for (const char *p = e; *p; p++) usart3_write_char(*p);
-    }
+        usart3_write_char(c);
+
+        if (!have_first)
+        {
+            // color
+            if (c == 'r' || c == 'b')
+            {
+                cmd_color = c;
+                have_first = 1;
+            }
+            else
+            {
+                usart3_write_string("\r\nERR: unknown color\r\nCMD? ");
+            }
+        }
+        else
+        {
+            // action
+            if (c == '0' || c == '1' || c == '2')
+            {
+                if (cmd_color == 'r')
+                {
+                    if (c == '0') led_red_off();
+                    else if (c == '1') led_red_on();
+                    else led_red_toggle();
+                }
+                else if (cmd_color == 'b')
+                {
+                    if (c == '0') led_blue_off();
+                    else if (c == '1') led_blue_on();
+                    else led_blue_toggle();
+                }
+
+                usart3_write_string("\r\nOK: ");
+                usart3_write_char(cmd_color);
+                usart3_write_char(c);
+                usart3_write_string("\r\nCMD? ");
+
+                // reset
+                have_first = 0;
+            }
+            else
+            {
+                usart3_write_string("\r\nERR: action must be 0/1/2\r\nCMD? ");
+                have_first = 0;
+            }
+        }
   }
 }
 

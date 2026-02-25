@@ -48,3 +48,11 @@ void My_HAL_RCC_GPIOA_CLK_Enable(void)
 {
 
 }
+
+void led_red_on(void)   { GPIOC->ODR |=  (1U<<6); }
+void led_red_off(void)  { GPIOC->ODR &= ~(1U<<6); }
+void led_red_toggle(void){GPIOC->ODR ^= (1U<<6); }
+
+void led_blue_on(void)  { GPIOC->ODR |=  (1U<<7); }
+void led_blue_off(void) { GPIOC->ODR &= ~(1U<<7); }
+void led_blue_toggle(void){GPIOC->ODR ^= (1U<<7); }

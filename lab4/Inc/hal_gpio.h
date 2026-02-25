@@ -9,3 +9,9 @@ void My_HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState 
 void My_HAL_GPIO_TogglePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 void My_HAL_RCC_GPIOC_CLK_Enable(void);
 void My_HAL_RCC_GPIOA_CLK_Enable(void);
+void led_red_on(void);
+void led_red_off(void);
+void led_red_toggle(void);
+void led_blue_on(void);
+void led_blue_off(void);
+void led_blue_toggle(void);
