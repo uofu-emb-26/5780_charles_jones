@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include "tim_setup.h"
 
 void SystemClock_Config(void);
 
@@ -13,6 +14,24 @@ int main(void)
   HAL_Init();
   /* Configure the system clock */
   SystemClock_Config();
+
+  RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+
+  // PC8, PC9 as general purpose output
+  GPIOC->MODER &= ~((3U << (8*2)) | (3U << (9*2)));
+  GPIOC->MODER |=  ((1U << (8*2)) | (1U << (9*2)));
+
+  // Start with green (PC8) on, orange (PC9) off
+  GPIOC->ODR |=  (1U << 8);
+  GPIOC->ODR &= ~(1U << 9);
+
+  TIM2_Init_4Hz();
+  TIM3_Init_PWM_800Hz();
+  TIM3_PWM_GPIO_PC6_PC7_Init();   // 3.3: route PWM to pins
+  TIM3_Start();                   // start PWM output
+
+  TIM3->CCR1 = 10;      // CH1 (PWM2) ~ almost fully ON (inverted)
+  TIM3->CCR2 = 10;
 
   while (1)
   {
