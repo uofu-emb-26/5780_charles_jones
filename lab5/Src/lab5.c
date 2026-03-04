@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include "hal_gpio.h"
 
 void SystemClock_Config(void);
 
@@ -13,6 +14,15 @@ int main(void)
   HAL_Init();
   /* Configure the system clock */
   SystemClock_Config();
+
+  My_HAL_RCC_GPIOC_CLK_Enable(); // Enable the GPIOC clock
+  My_HAL_RCC_GPIOB_CLK_Enable(); // Enable the GPIOB clock
+
+  GPIO_InitTypeDef initStr = {0};
+  My_HAL_GPIO_Init(GPIOB, &initStr); // Initialize pins
+  My_HAL_GPIO_Init(GPIOC, &initStr); // Initialize pins
+
+  RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
 
   while (1)
   {
