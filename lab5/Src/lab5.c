@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
+#include <assert.h>
 #include "hal_gpio.h"
 
 void SystemClock_Config(void);
@@ -15,8 +16,12 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  My_HAL_RCC_GPIOC_CLK_Enable(); // Enable the GPIOC clock
-  My_HAL_RCC_GPIOB_CLK_Enable(); // Enable the GPIOB clock
+  // DEBUG LED
+  RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+  GPIOC->MODER |= (1 << (2*6)) | (1 << (2*7)) | (1 << (2*8)) | (1 << (2*9));
+
+  My_HAL_RCC_GPIOB_CLK_Enable(); // Enable the GPIOC clock
+  My_HAL_RCC_GPIOC_CLK_Enable(); // Enable the GPIOB clock
 
   GPIO_InitTypeDef initStr = {0};
   My_HAL_GPIO_Init(GPIOB, &initStr); // Initialize pins
@@ -26,8 +31,28 @@ int main(void)
 
   // set TIMINGR registers
   I2C_TIMINGR();
+  
   // Enable I2C
   I2C2->CR1 = I2C_CR1_PE;
+
+  I2C2->CR2 &= ~((0x7F << 16) | (0x3FF << 0));
+
+  // Clear NBYTES and SADD
+  I2C2->CR2 = 0;
+  I2C2->CR2 |= (1 << 16) | (0x69 << 1) | (0 << 10) | (1 << 13);
+
+I2C2->TXDR = 0x0F;
+
+  while(!(I2C2->ISR & I2C_ISR_TC));
+
+  I2C2->CR2 = 0;
+  I2C2->CR2 |= (1 << 16) | (0x69 << 1) | (1 << 10) | (1 << 13);
+
+while(!(I2C2->ISR & I2C_ISR_RXNE) && !(I2C2->ISR & I2C_ISR_NACKF));
+
+while(!(I2C2->ISR & I2C_ISR_TC));
+
+  I2C2->CR2 |= I2C_CR2_STOP;
 
   while (1)
   {
