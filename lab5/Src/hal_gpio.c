@@ -6,32 +6,36 @@ void My_HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
 {
     (void)GPIO_Init;
 
-    if (GPIOx == GPIOC){
-        // set MODER
-        GPIOC->MODER &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*8) | 3u << (2*9));
-        GPIOC->MODER |= ((1u << (2*6)) | (1u << (2*7)) | (1u << (2*8)) | (1u << (2*9)));
+    if (GPIOx == GPIOB){
+        // set MODER to alternate
+        GPIOB->MODER &= ~(3 << (2*11) | 3 << (2*13) | 3 << (2*14));
+        GPIOB->MODER |=  (2 << (2*11) | 2 << (2*13) | 1 << (2*14));
 
-        // set OTYPER
-        GPIOC->OTYPER &= ~(1u << (6) | 1u << (7) | 1u << (8) | 1u << (9));
+        // set open drain
+        GPIOB->OTYPER |=  (1 << 11 | 1 << 13);
 
-        // set OSPEEDR
-        GPIOC->OSPEEDR &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*8) | 3u << (2*9));
+        // push - pull
+        GPIOB->OTYPER &=  ~(1 << 14);
 
-        // set PUDR
-        GPIOC->PUPDR &= ~(3u << (2*6) | 3u << (2*7) | 3u << (2*8) | 3u << (2*9));
+        // set I2C2_SDA
+        GPIOB->AFRH &= ~(0xFu << 4 * (11 - 8) | 0xFu << 4 * (13 - 8));
+        GPIOB->AFRH |= (1 << 4 * (11 - 8) | 5 << 4 * (13 - 8));
+
+        // PB14 high
+        GPIOB->ODR |=  (1 << 14);
     }
 
-    if (GPIOx == GPIOA) {
+    if (GPIOx == GPIOC) {
 
-    // PA0 input mode (MODER = 00)
-    GPIOA->MODER &= ~(3u << (2*0));
+        // PC0 input mode (MODER = 00)
+        GPIOC->MODER &= ~(3 << (2*0));
+        GPIOC->MODER |=  (1 << (2*0));
 
-    // Low speed (OSPEEDR = 00)
-    GPIOA->OSPEEDR &= ~(3u << (2*0));
+        // push pull
+        GPIOC->OTYPER &= ~(1 << 0);
 
-    // Pull-down resistor (PUPDR = 10)
-    GPIOA->PUPDR &= ~(3u << (2*0));
-    GPIOA->PUPDR |=  (2u << (2*0));
+        // PC0 high
+        GPIOC->ODR |= (1 << 0);
     }
 }
 
@@ -92,3 +96,12 @@ void Configure_EXTI0_Rising(void)
     NVIC_SetPriority(EXTI0_1_IRQn, 3);
     NVIC_EnableIRQ(EXTI0_1_IRQn);
 }
+
+void I2C_TIMINGR(void)
+{
+    I2C2->TIMINGR |= (1 << 28);
+    I2C2->TIMINGR |= (4 << 20);
+    I2C2->TIMINGR |= (2 << 16);
+    I2C2->TIMINGR |= (0xFu << 8);
+    I2C2->TIMINGR |= (0x13 << 0);
+} 

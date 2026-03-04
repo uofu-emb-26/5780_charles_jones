@@ -24,6 +24,11 @@ int main(void)
 
   RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
 
+  // set TIMINGR registers
+  I2C_TIMINGR();
+  // Enable I2C
+  I2C2->CR1 = I2C_CR1_PE;
+
   while (1)
   {
  
