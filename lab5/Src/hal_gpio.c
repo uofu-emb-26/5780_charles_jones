@@ -7,29 +7,22 @@ void My_HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
     (void)GPIO_Init;
 
 if (GPIOx == GPIOB) {
-    // PB11, PB13 = AF (10)
     GPIOB->MODER &= ~((3u<<(2*11)) | (3u<<(2*13)));
     GPIOB->MODER |=  ((2u<<(2*11)) | (2u<<(2*13)));
 
-    // PB14 = output (01)
     GPIOB->MODER &= ~(3u<<(2*14));
     GPIOB->MODER |=  (1u<<(2*14));
 
-    // open-drain for I2C pins, push-pull for PB14
     GPIOB->OTYPER |=  (1u<<11) | (1u<<13);
     GPIOB->OTYPER &= ~(1u<<14);
 
-    // no internal pulls on I2C pins
     GPIOB->PUPDR &= ~((3u<<(2*11)) | (3u<<(2*13)));
 
-    // high speed on I2C pins (helps edges)
     GPIOB->OSPEEDR |= (3u<<(2*11)) | (3u<<(2*13));
 
-    // AFR: PB11 AF1 (I2C2_SDA), PB13 AF5 (I2C2_SCL)
     GPIOB->AFR[1] &= ~((0xFu<<(4*(11-8))) | (0xFu<<(4*(13-8))));
     GPIOB->AFR[1] |=  ((1u  <<(4*(11-8))) | (5u  <<(4*(13-8))));
 
-    // PB14 high (address select)
     GPIOB->ODR |= (1u<<14);
 }
 
@@ -42,7 +35,6 @@ if (GPIOx == GPIOB) {
         // push-pull
         GPIOC->OTYPER &= ~(1 << 0);
 
-        // drive HIGH → enables I2C mode
         GPIOC->ODR |= (1 << 0);
     }
 }

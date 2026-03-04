@@ -35,30 +35,75 @@ int main(void)
   // Enable I2C
   I2C2->CR1 = I2C_CR1_PE;
 
-  I2C2->CR2 &= ~((0x7F << 16) | (0x3FF << 0));
-
-  // Clear NBYTES and SADD
   I2C2->CR2 = 0;
-  I2C2->CR2 |= (1 << 16) | (0x69 << 1) | (0 << 10) | (1 << 13);
+  I2C2->CR2 |= (0x69 << 1);
+  I2C2->CR2 |= (2 << 16);
+  I2C2->CR2 |= (0 << 10);
+  I2C2->CR2 |= (1 << 13);
 
-I2C2->TXDR = 0x0F;
+  while(!(I2C2->ISR & I2C_ISR_TXIS) && !(I2C2->ISR & I2C_ISR_NACKF));
+  I2C2->TXDR = 0x20;
+
+  while(!(I2C2->ISR & I2C_ISR_TXIS) && !(I2C2->ISR & I2C_ISR_NACKF));
+  I2C2->TXDR = 0x0B;
 
   while(!(I2C2->ISR & I2C_ISR_TC));
-
-  I2C2->CR2 = 0;
-  I2C2->CR2 |= (1 << 16) | (0x69 << 1) | (1 << 10) | (1 << 13);
-
-while(!(I2C2->ISR & I2C_ISR_RXNE) && !(I2C2->ISR & I2C_ISR_NACKF));
-
-while(!(I2C2->ISR & I2C_ISR_TC));
 
   I2C2->CR2 |= I2C_CR2_STOP;
 
   while (1)
-  {
+{
+  uint8_t xl, xh, yl, yh;
+  int16_t x, y;
+
+  I2C2->CR2 = 0;
+  I2C2->CR2 |= (0x69 << 1);
+  I2C2->CR2 |= (1 << 16);
+  I2C2->CR2 |= (0 << 10);
+  I2C2->CR2 |= (1 << 13);
+
+  while(!(I2C2->ISR & I2C_ISR_TXIS) && !(I2C2->ISR & I2C_ISR_NACKF));
+  I2C2->TXDR = (0x28 | 0x80);
+
+  while(!(I2C2->ISR & I2C_ISR_TC)); 
+
+  I2C2->CR2 = 0;
+  I2C2->CR2 |= (0x69 << 1);
+  I2C2->CR2 |= (4 << 16);
+  I2C2->CR2 |= (1 << 10);
+  I2C2->CR2 |= (1 << 13);
+
+  while(!(I2C2->ISR & I2C_ISR_RXNE) && !(I2C2->ISR & I2C_ISR_NACKF));
+  xl = I2C2->RXDR;
+  while(!(I2C2->ISR & I2C_ISR_RXNE) && !(I2C2->ISR & I2C_ISR_NACKF));
+  xh = I2C2->RXDR;
+  while(!(I2C2->ISR & I2C_ISR_RXNE) && !(I2C2->ISR & I2C_ISR_NACKF));
+  yl = I2C2->RXDR;
+  while(!(I2C2->ISR & I2C_ISR_RXNE) && !(I2C2->ISR & I2C_ISR_NACKF));
+  yh = I2C2->RXDR;
+
+  while(!(I2C2->ISR & I2C_ISR_TC));
+
+  I2C2->CR2 |= I2C_CR2_STOP;
+
+  x = (int16_t)((xh << 8) | xl);
+  y = (int16_t)((yh << 8) | yl);
+
+  // Clear
+  GPIOC->ODR &= ~((1<<6)|(1<<7)|(1<<8)|(1<<9));
+
+  // X axis
+  if (x > 1000)        GPIOC->ODR |= (1<<9);  // +X
+  else if (x < -1000)  GPIOC->ODR |= (1<<8);  // -X
+
+  // Y axis
+  if (y > 1000)        GPIOC->ODR |= (1<<6);  // +Y
+  else if (y < -1000)  GPIOC->ODR |= (1<<7);  // -Y
+
+  HAL_Delay(100);
+}
+
  
-  }
-  return -1;
 }
 
 /**
