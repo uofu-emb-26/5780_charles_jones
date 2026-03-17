@@ -3,6 +3,10 @@
 
 void SystemClock_Config(void);
 
+// Sine Wave: 8-bit, 32 samples/cycle
+const uint8_t sine_table[32] = {127,151,175,197,216,232,244,251,254,251,244,
+232,216,197,175,151,127,102,78,56,37,21,9,2,0,2,9,21,37,56,78,102};
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -16,7 +20,9 @@ int main(void)
 
   // Enable clocks
   RCC->AHBENR  |= RCC_AHBENR_GPIOCEN;
+  RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
   RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
+  RCC->APB1ENR |= RCC_APB1ENR_DACEN;
 
   // Enable HSI14 clock for ADC
   RCC->CR2 |= RCC_CR2_HSI14ON;
@@ -49,6 +55,11 @@ int main(void)
   // Start conversion
   ADC1->CR |= ADC_CR_ADSTART;
 
+  GPIOA->MODER |= (3 << 8);
+
+  DAC->CR |= DAC_CR_TSEL1;   // software trigger
+  DAC->CR |= DAC_CR_EN1;     // enable channel 1
+
   while (1)
   {
     // Wait for conversion to complete
@@ -56,8 +67,6 @@ int main(void)
 
           // Read ADC value
         uint32_t adc_val = ADC1->DR;
-
-        GPIOC->ODR |= (1 << 6);
         
         // Turn LEDs on/off based on value
         if(adc_val > 64)
@@ -79,6 +88,13 @@ int main(void)
             GPIOC->ODR |= (1 << 9);
         else
             GPIOC->ODR &= ~(1 << 9);
+
+      
+    // DAC - waveform generation
+    static uint32_t i = 0;
+    DAC->DHR8R1 = sine_table[i];
+    i = (i + 1) % 32;
+    HAL_Delay(1);
   }
   return -1;
 }
