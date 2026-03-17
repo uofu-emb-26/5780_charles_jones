@@ -14,9 +14,71 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  // Enable clocks
+  RCC->AHBENR  |= RCC_AHBENR_GPIOCEN;
+  RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
+
+  // Enable HSI14 clock for ADC
+  RCC->CR2 |= RCC_CR2_HSI14ON;
+  while(!(RCC->CR2 & RCC_CR2_HSI14RDY));
+
+  // Configure LEDs PC6-PC9 as output
+  GPIOC->MODER |= (1 << 12) | (1 << 14) | (1 << 16) | (1 << 18);
+
+  // Configure PC0 as analog mode
+  GPIOC->MODER |= (3 << 0);
+
+  // Configure ADC - 8bit, continuous, software trigger
+  ADC1->CFGR1 |= (2 << 3);
+  ADC1->CFGR1 |= (1 << 13);
+  ADC1->CFGR1 &= ~(1 << 10);
+
+  // Select channel 10 (PC0)
+  ADC1->CHSELR |= (1 << 10);
+
+  // Calibrate - must be disabled first
+  ADC1->CR &= ~ADC_CR_ADEN;
+  ADC1->CR |= ADC_CR_ADCAL;
+  while(ADC1->CR & ADC_CR_ADCAL);
+
+  // Enable ADC
+  ADC1->CR |= ADC_CR_ADEN;
+  // Wait for ADC ready
+  while(!(ADC1->ISR & ADC_ISR_ADRDY));
+
+  // Start conversion
+  ADC1->CR |= ADC_CR_ADSTART;
+
   while (1)
   {
- 
+    // Wait for conversion to complete
+    while(!(ADC1->ISR & ADC_ISR_EOC));
+
+          // Read ADC value
+        uint32_t adc_val = ADC1->DR;
+
+        GPIOC->ODR |= (1 << 6);
+        
+        // Turn LEDs on/off based on value
+        if(adc_val > 64)
+            GPIOC->ODR |= (1 << 6);
+        else
+            GPIOC->ODR &= ~(1 << 6);
+            
+        if(adc_val > 128)
+            GPIOC->ODR |= (1 << 7);
+        else
+            GPIOC->ODR &= ~(1 << 7);
+            
+        if(adc_val > 192)
+            GPIOC->ODR |= (1 << 8);
+        else
+            GPIOC->ODR &= ~(1 << 8);
+            
+        if(adc_val > 230)
+            GPIOC->ODR |= (1 << 9);
+        else
+            GPIOC->ODR &= ~(1 << 9);
   }
   return -1;
 }
